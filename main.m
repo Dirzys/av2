@@ -12,7 +12,6 @@ for i = 1:46
     hold on;
     plot(y, x, 'gx');
     hold on
-%     plot(uint32(x), uint32(y), 'gx');
     Img_prev = Img;
 %     [centers, radii] = imfindcircles(diff, [290 310], 'Sensitivity', 0.9);
 %     viscircles(centers, radii);
