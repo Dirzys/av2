@@ -1,7 +1,5 @@
-WRONG_DEPTH = -1;
-
 for i = 1:46
-    maskedRangeImage = maskRangeImage(i, WRONG_DEPTH);
+    maskedRangeImage = maskRangeImage(i);
     center = findCenter(maskedRangeImage);
-    pause(1)
+    pause(0.5)
 end
