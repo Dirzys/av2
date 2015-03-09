@@ -16,7 +16,7 @@ function [ XYZ ] = maskRangeImage(i)
     
     %Img_mask = bwconvhull(Img_mask);
     
-    imshow(Img_mask);
+    imshow(Img);
     hold on
     % Apply mask on 3-D range image
     XYZ_depth = XYZ(:,:,3);

@@ -1,5 +1,5 @@
-function [ bestCenter ] = findCenter(maskedRangeImage)
-    ITER = 20000;
+function [ bestCenter ] = findCenter(maskedRangeImage, rangeMulti)
+    ITER = 50000;
     threshDist = 0.0001;
     number = size(maskedRangeImage, 1);
     num = 4;
@@ -8,6 +8,8 @@ function [ bestCenter ] = findCenter(maskedRangeImage)
     bestRadius = 0;
     bestSamples = 0;
     bestSamples2 = 0;
+    bestRadius2 = 0;
+    bestCenter2 = 0;
     for i = 1:ITER
         % Randomly select 5 points that are not in background
         k = randperm(number/2*(number-1),num);
@@ -42,25 +44,25 @@ function [ bestCenter ] = findCenter(maskedRangeImage)
         if inlierNum > bestInNum
             projected_samples = [];
             for j = 1: length(q)
-                projected_samples = [projected_samples; q(j) p(j) maskedRangeImage(q(j), p(j), 3)*6000];
+                projected_samples = [projected_samples; q(j) p(j) maskedRangeImage(q(j), p(j), 3)*1200/rangeMulti];
             end
             [projected_center, projected_radius] = sphereFit(projected_samples);
             %plot(projected_center(2), projected_center(1), 'r+')
             %pause(0.5)
             bestInNum = inlierNum;
-            bestCenter = projected_center;
-            bestRadius = projected_radius;
+            bestCenter = center;
+            bestRadius2 = projected_radius;
+            bestRadius = radius;
             bestSamples = samples;
             bestSamples2 = projected_samples;
+            bestCenter2 = projected_center;
         end
         %break
     end
-    plot(bestCenter(2), bestCenter(1), 'r+', 'LineWidth', 10)
-%     bestRadius;
+    plot(bestCenter2(2), bestCenter2(1), 'r+', 'LineWidth', 10)
 %     for j=1:length(bestSamples2)
 %         plot(bestSamples2(j, 2), bestSamples2(j, 1), 'g+')
 %     end
-%     bestSamples;
-%     bestSamples2;
+    drawCentres(bestCenter2, bestRadius2)
 end
 
