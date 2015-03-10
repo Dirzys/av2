@@ -1,6 +1,6 @@
 function [ bestCenter ] = findCenter(maskedRangeImage, rangeMulti)
     ITER = 50000;
-    threshDist = 0.0001;
+    threshDist = 0.0005;
     number = size(maskedRangeImage, 1);
     num = 4;
     bestInNum = 0; % Best fitting sphere with largest number of inliers
@@ -47,8 +47,8 @@ function [ bestCenter ] = findCenter(maskedRangeImage, rangeMulti)
                 projected_samples = [projected_samples; q(j) p(j) maskedRangeImage(q(j), p(j), 3)*1200/rangeMulti];
             end
             [projected_center, projected_radius] = sphereFit(projected_samples);
-            %plot(projected_center(2), projected_center(1), 'r+')
-            %pause(0.5)
+            plot(projected_center(2), projected_center(1), 'r+')
+            pause(0.5)
             bestInNum = inlierNum;
             bestCenter = center;
             bestRadius2 = projected_radius;
