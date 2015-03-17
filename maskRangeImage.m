@@ -7,7 +7,7 @@ function [ XYZ ] = maskRangeImage(i)
     props = regionprops(Img_bw, 'Area', 'PixelList');
     % Only consider the largest object
     areas = cat(1, props.Area);
-    [max_area, i] = max(areas);
+    [~, i] = max(areas);
     % Create a mask
     Img_mask = zeros(1200);
     for k=1:length(props(i).PixelList)

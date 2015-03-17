@@ -1,4 +1,4 @@
-function [ x_final maxDistance ] = findCenter(maskedRangeImage)
+function [ x_final, maxDistance ] = findCenter(maskedRangeImage, maxDistanceLast)
     ITER = 20;
     threshDist = 0.00001;
     number = size(maskedRangeImage, 1);
@@ -62,6 +62,10 @@ function [ x_final maxDistance ] = findCenter(maskedRangeImage)
 %     for j=1:length(bestSamples2)
 %         plot(bestSamples2(j, 2), bestSamples2(j, 1), 'g+')
 %     end
+    % heuristic to limit frame to frame radius variation
+    if maxDistanceLast
+        maxDistance = (maxDistance + maxDistanceLast) / 2;
+    end
     viscircles([x_final(1) x_final(2)],maxDistance);
 end
 
