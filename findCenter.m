@@ -1,31 +1,22 @@
-function [ bestCenter ] = findCenter(maskedRangeImage)
-    ITER = 50000;
+function [ x_final maxDistance ] = findCenter(maskedRangeImage)
+    ITER = 20;
     threshDist = 0.00001;
     number = size(maskedRangeImage, 1);
     num = 4;
+    
+    idx = find(maskedRangeImage(:,:,3) ~= -1);
+    
     bestInNum = 0; % Best fitting sphere with largest number of inliers
     bestCenter = [0, 0, 0]; % centre for the best fitting sphere
     bestInliers = 0;
     for i = 1:ITER
         % Randomly select 4 points that are not in background
-        k = randperm(number/2*(number-1),num);
-        q = floor(sqrt(8*(k-1) + 1)/2 + 3/2);
-        p = k - (q-1).*(q-2)/2;
-        bad_sample = 0;
-        for j = 1: length(q)
-            depth = maskedRangeImage(q(j), p(j), 3);
-            if depth < 0
-                bad_sample = 1;
-                break
-            end
-        end
+        randIdx = randperm(length(idx), num);
+        sampleIdx = idx(randIdx);
+        p = idivide(int32(sampleIdx), int32(1200), 'ceil');
+        q = mod(sampleIdx,1200);
         
-        % If selected point that is background - try again
-        if bad_sample == 1
-            continue
-        end
-        
-        % Otherwise, collect information about 4 samples
+        % Collect information about 4 samples
         samples = [];
         for j = 1: length(q)
             samples = [samples; maskedRangeImage(q(j), p(j), 1) maskedRangeImage(q(j), p(j), 2) maskedRangeImage(q(j), p(j), 3)];
