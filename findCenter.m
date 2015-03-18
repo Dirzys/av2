@@ -1,5 +1,5 @@
-function [ x_final, maxDistance ] = findCenter(maskedRangeImage, maxDistanceLast)
-    ITER = 20;
+function [ x_final, maxDistance, bestCenter ] = findCenter(maskedRangeImage, maxDistanceLast)
+    ITER = 200;
     threshDist = 0.00001;
     number = size(maskedRangeImage, 1);
     num = 4;
