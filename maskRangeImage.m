@@ -3,7 +3,7 @@ function [ XYZ ] = maskRangeImage(i)
     load(strcat('set/falling_ball_',sprintf('%02d', i),'.mat'));
     % First threshold the background
     Img_bw = imcomplement(im2bw(Img, 0.08));
-    % Extarct objects
+    % Extract objects
     props = regionprops(Img_bw, 'Area', 'PixelList');
     % Only consider the largest object
     areas = cat(1, props.Area);
@@ -13,8 +13,6 @@ function [ XYZ ] = maskRangeImage(i)
     for k=1:length(props(i).PixelList)
         Img_mask(props(i).PixelList(k,2),props(i).PixelList(k,1)) = 1;
     end
-    
-    %Img_mask = bwconvhull(Img_mask);
     
     imshow(Img);
     hold on
