@@ -14,20 +14,23 @@ for i = 1:FRAMES
     maskedRangeImage = maskRangeImage(i);
     [center, radius, bestCenter] = findCenter(maskedRangeImage, radius);
     y_positions(i) = bestCenter(2);
-    text(20,1170,strcat('Frame #', num2str(i)),'Color','white');
+    text(20,1170,strcat('Frame #', num2str(i)),'Color','white','fontname','fixedwidth');
     
     if i >= 2
 %         v = fps*(test(i) - last_y);
         v = fps*(bestCenter(2) - last_y);
         v_s(i-1) = v;
-        text(20,30,strcat('Instantaneous downward velocity v=', num2str(v),' m/s'),'Color','white');
+        text(20,30,strcat('Measured  v=', num2str(v),' m/s'),'Color','white','fontname','fixedwidth');
         if i >= 3
-            a = estimateAcceleration(v_s(1:i-1), fps);
-            text(20,70,strcat('Estimated downward acceleration a=', num2str(a),' m/s^2'),'Color','white');
+            [ a, v_est ] = estimateAcceleration(v_s(1:i-1), fps);
+            text(20,70,strcat('Estimated v=', num2str(v_est),' m/s'),'Color','white','fontname','fixedwidth');
+            text(20,110,strcat('Estimated a=', num2str(a),' m/s^2'),'Color','white','fontname','fixedwidth');
         end
         last_v = v;
     end
     last_y = bestCenter(2);
 %     last_y = test(i);
+    text(200,400,strcat('Final velocity v=', num2str(v_est),' m/s'),'Color','white','fontname','fixedwidth');
+    text(200,450,strcat('Acceleration estimate a=', num2str(a),' m/s'),'Color','white','fontname','fixedwidth');
     pause(0.5)
 end
