@@ -29,5 +29,5 @@ for i = 1:FRAMES
     end
     last_y = bestCenter(2);
 %     last_y = test(i);
-    pause(0.01)
+    pause(0.5)
 end

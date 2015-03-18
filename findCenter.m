@@ -1,71 +1,71 @@
-function [ x_final, maxDistance, bestCenter ] = findCenter(maskedRangeImage, maxDistanceLast)
+function [ bestCenterProjected, radius, bestCenter ] = findCenter(maskedRangeImage, radiusLast)
+    % RANSAC parameters
     ITER = 200;
-    threshDist = 0.00001;
-    number = size(maskedRangeImage, 1);
-    num = 4;
+    DIST = 0.00001;
+    NUM = 4;
     
-    idx = find(maskedRangeImage(:,:,3) ~= -1);
+    % Convert masked range image into two dimensional array
+    rangeImage = reshape(maskedRangeImage, size(maskedRangeImage,1)*size(maskedRangeImage,2), size(maskedRangeImage,3));
+    % Find masked values
+    idx = find(rangeImage(:,3) ~= -1);
+    potentialSphere = rangeImage(idx, :);
     
+    % RANSAC
     bestInNum = 0; % Best fitting sphere with largest number of inliers
-    bestCenter = [0, 0, 0]; % centre for the best fitting sphere
-    bestInliers = 0;
+    bestCenter = 0; % Centre for the best fitting sphere
+    bestInliers = 0; % Sphere inliers within distance DIST that belongs to the fitted sphere surface 
     for i = 1:ITER
-        % Randomly select 4 points that are not in background
-        randIdx = randperm(length(idx), num);
-        sampleIdx = idx(randIdx);
-        p = idivide(int32(sampleIdx), int32(1200), 'ceil');
-        q = mod(sampleIdx,1200);
+        % Randomly select 4 points that are not in the background
+        randIdx = randperm(length(idx), NUM);
+        samplesIdx = idx(randIdx);
         
         % Collect information about 4 samples
-        samples = [];
-        for j = 1: length(q)
-            samples = [samples; maskedRangeImage(q(j), p(j), 1) maskedRangeImage(q(j), p(j), 2) maskedRangeImage(q(j), p(j), 3)];
-        end
-        % Fit sphere
+        samples = rangeImage(samplesIdx, :);
+        
+        % Fit sphere on collected samples
         [center, radius] = sphereFit(samples);
         
-        distance = sqrt((maskedRangeImage(:, :, 1)-center(1)).^2 + (maskedRangeImage(:, :, 2)-center(2)).^2 + (maskedRangeImage(:, :, 3)-center(3)).^2);
-        inlierIdx = find(distance <= threshDist + radius & distance >= radius - threshDist); 
+        % Check the number of fitted sphere's surface inliers within
+        % distance DIST
+        distance = sqrt((potentialSphere(:, 1)-center(1)).^2 + (potentialSphere(:, 2)-center(2)).^2 + (potentialSphere(:, 3)-center(3)).^2);
+        inlierIdx = find(distance <= DIST + radius & distance >= radius - DIST); 
         inlierNum = length(inlierIdx);
         
+        % If number of inliers increased, then select this sphere as a best
+        % currently fitted sphere
         if inlierNum > bestInNum
             bestInNum = inlierNum;
             bestCenter = center;
             bestInliers = inlierIdx;
         end
-        %break
     end
-    %bestCenter
-    K=[[4597.95 0 672.846];[0 4603.2 362.875];[0 0 1]];
-    x_img = K*bestCenter';
-    x_final = x_img/x_img(3);
     
+    % Project coordinates of fitted sphere's center onto intensity image
+    bestCenterProjected = projectCoordinates(bestCenter');
+    
+    % Find inlier with the maximum distance from the centre
+    % and not considering depth of the point
     maxDistance = 0;
-    maxRow = 0;
-    maxCol = 0;
-    
+    maxIdx = 0;
     for i=1:length(bestInliers)
-        col = idivide(int32(bestInliers(i)), int32(1200), 'ceil');
-        row = mod(bestInliers(i),1200);
-        distance = sqrt((maskedRangeImage(row, col, 2)-bestCenter(1)).^2 + (maskedRangeImage(row, col, 1)-bestCenter(2)).^2);
+        distance = sqrt((potentialSphere(i, 2)-bestCenterProjected(1)).^2 + (potentialSphere(i, 1)-bestCenterProjected(2)).^2);
         if distance > maxDistance
             maxDistance = distance;
-            maxRow = row;
-            maxCol = col;
+            maxIdx = i;
         end
     end
-    x_inlier = K*[maskedRangeImage(maxRow, maxCol, 1); maskedRangeImage(maxRow, maxCol, 2); maskedRangeImage(maxRow, maxCol, 3)];
-    x_inlier_final = x_inlier/x_inlier(3);
-    maxDistance = sqrt((x_inlier_final(1)-x_final(1)).^2 + (x_inlier_final(2)-x_final(2)).^2);
     
-    plot(x_final(1), x_final(2), 'g+', 'LineWidth', 10);
-%     for j=1:length(bestSamples2)
-%         plot(bestSamples2(j, 2), bestSamples2(j, 1), 'g+')
-%     end
-    % heuristic to limit frame to frame radius variation
-    if maxDistanceLast
-        maxDistance = (maxDistance + maxDistanceLast) / 2;
+    % Project the innermost inlier onto intensity image 
+    maxProjected = projectCoordinates([potentialSphere(maxIdx, 1); potentialSphere(maxIdx, 2); potentialSphere(maxIdx, 3)]);
+    % Find the radius of the sphere
+    radius = sqrt((maxProjected(1)-bestCenterProjected(1)).^2 + (maxProjected(2)-bestCenterProjected(2)).^2);
+    
+    % Heuristic to limit frame to frame radius variation
+    if radiusLast
+        radius = (radius + radiusLast) / 2;
     end
-    viscircles([x_final(1) x_final(2)],maxDistance);
+    
+    plot(bestCenterProjected(1), bestCenterProjected(2), 'r+', 'LineWidth', 5);
+    viscircles([bestCenterProjected(1) bestCenterProjected(2)], radius);
 end
 
