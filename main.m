@@ -30,7 +30,7 @@ for i = 1:FRAMES
     end
     last_y = bestCenter(2);
 %     last_y = test(i);
-    text(200,400,strcat('Final velocity v=', num2str(v_est),' m/s'),'Color','white','fontname','fixedwidth');
-    text(200,450,strcat('Acceleration estimate a=', num2str(a),' m/s'),'Color','white','fontname','fixedwidth');
     pause(0.5)
 end
+text(200,400,strcat('Final velocity v=', num2str(v_est),' m/s'),'Color','white','fontname','fixedwidth');
+text(200,450,strcat('Acceleration estimate a=', num2str(a),' m/s'),'Color','white','fontname','fixedwidth');
